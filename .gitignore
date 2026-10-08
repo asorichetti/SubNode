@@ -48,7 +48,8 @@ coverage/
 *.dylib
 *.test
 *.out
-go.sum
+# go.sum files are committed for CI compatibility
+# go.sum
 
 # TypeScript
 *.tsbuildinfo
