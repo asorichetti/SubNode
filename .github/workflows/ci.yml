@@ -138,8 +138,8 @@ jobs:
           cd backend && go mod download
           go run ./cmd/seed main.go || true
 
-      - name: Install Playwright browsers
-        run: cd tools/ui-cli && npx playwright install --with-deps chromium
+      - name: Install Playwright driver & browsers
+        run: cd tools/ui-cli && go run github.com/mxschmitt/playwright-go/cmd/playwright@v0.6201.1 install --with-deps
 
       - name: Start backend server
         run: |
@@ -150,9 +150,6 @@ jobs:
             curl -sf http://localhost:8080/health && break
             sleep 1
           done
-
-      - name: Install Playwright browsers
-        run: cd tools/ui-cli && npx playwright install --with-deps chromium
 
       - name: Run journey tests --ux-gates off
         run: |
@@ -227,8 +224,8 @@ jobs:
             sleep 1
           done
 
-      - name: Install Playwright browsers
-        run: cd tools/ui-cli && npx playwright install --with-deps chromium
+      - name: Install Playwright driver & browsers
+        run: cd tools/ui-cli && go run github.com/mxschmitt/playwright-go/cmd/playwright@v0.6201.1 install --with-deps
 
       - name: Run full regression sweep
         run: |
