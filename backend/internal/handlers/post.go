@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/asorichetti/subnode/backend/internal/models"
@@ -190,7 +189,9 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 	}
 
 	// Check if user is author or admin
-	if post.AuthorID != userID && !isAdmin(c) {
+	userRole, _ := c.Get("user_role")
+	isAdmin := userRole == "admin"
+	if post.AuthorID != userID && !isAdmin {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized"})
 		return
 	}
@@ -205,7 +206,12 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 
 // VotePost handles voting on a post
 func (h *PostHandler) VotePost(c *gin.Context) {
-	postID := c.Param("id")
+	postIDStr := c.Param("id")
+	postID, err := uuid.Parse(postIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+		return
+	}
 	userID, _ := c.Get("user_id")
 	var req VoteRequest
 
@@ -221,7 +227,7 @@ func (h *PostHandler) VotePost(c *gin.Context) {
 		if existingVote.VoteType == req.Vote {
 			// Remove vote
 			h.DB.Delete(&existingVote)
-			h.recalculateVoteCount(postID, "post")
+			h.recalculateVoteCount(postID.String(), "post")
 			c.JSON(http.StatusOK, gin.H{"message": "Vote removed"})
 			return
 		}
@@ -238,7 +244,7 @@ func (h *PostHandler) VotePost(c *gin.Context) {
 		h.DB.Create(&vote)
 	}
 
-	h.recalculateVoteCount(postID, "post")
+	h.recalculateVoteCount(postID.String(), "post")
 	c.JSON(http.StatusOK, gin.H{"message": "Vote recorded"})
 }
 

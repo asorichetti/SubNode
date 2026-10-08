@@ -100,9 +100,10 @@ func runJourney(j journeys.Journey) error {
 
 	// Create context
 	ctx := &journeys.Context{
-		Page:  page,
-		Gates: recorder,
-		Logf:  func(format string, args ...any) {},
+		Page:    page,
+		BaseURL: GetBaseURL(),
+		Gates:   recorder,
+		Logf:    func(format string, args ...any) {},
 	}
 
 	// Goto helper
@@ -119,7 +120,7 @@ func runJourney(j journeys.Journey) error {
 	uxgates.RunConsole(page, snapshots, recorder)
 	uxgates.RunNetwork(page, snapshots, recorder)
 
-	if recorder.Failed() {
+	if recorder.Failed() && uxGates != "off" {
 		return fmt.Errorf("journey %s failed: gate failures detected", j.Name)
 	}
 
