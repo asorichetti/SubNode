@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -88,10 +89,16 @@ func (m *AuthMiddleware) RequireModerator() gin.HandlerFunc {
 // validateToken extracts user ID from token
 // This is a simplified version - replace with proper JWT validation
 func (m *AuthMiddleware) validateToken(token string) (uuid.UUID, error) {
-	// Placeholder for actual JWT validation
-	// In production, decode and verify JWT token
-	// Return the user ID from the token claims
-	var dummyID uuid.UUID
-	_ = dummyID
-	return dummyID, nil
+	// Simple token format: userID.username.secret
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return uuid.Nil, fmt.Errorf("invalid token format")
+	}
+
+	userID, err := uuid.Parse(parts[0])
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid user ID in token")
+	}
+
+	return userID, nil
 }

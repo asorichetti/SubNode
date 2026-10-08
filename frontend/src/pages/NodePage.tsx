@@ -47,7 +47,7 @@ const NodePage: React.FC = () => {
 
   if (error || !node) {
     return (
-      <div className="text-center py-12">
+      <div data-testid="common-not-found" className="text-center py-12">
         <h2 className="text-2xl font-bold text-red-400 mb-2">Node Not Found</h2>
         <p className="text-[#8b929a]">{error || 'The node you\'re looking for doesn\'t exist.'}</p>
         <Link to="/" className="inline-block mt-4 text-orange-400 hover:text-orange-300">
@@ -60,8 +60,8 @@ const NodePage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Node Header */}
-      <div className="bg-[#1a1f2b] rounded-lg p-6 border border-[#373e4a]">
-        <h1 className="text-3xl font-bold text-orange-400 mb-2">{node.name}</h1>
+      <div data-testid="node-header" className="bg-[#1a1f2b] rounded-lg p-6 border border-[#373e4a]">
+        <h1 data-testid="node-page-title" className="text-3xl font-bold text-orange-400 mb-2">{node.name}</h1>
         {node.description && (
           <p className="text-[#8b929a] mb-4">{node.description}</p>
         )}
@@ -83,6 +83,7 @@ const NodePage: React.FC = () => {
         {isAuthenticated && (
           <Link
             to={`/node/${slug}/new-post`}
+            data-testid="node-new-post-btn"
             className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
           >
             New Post
@@ -95,7 +96,7 @@ const NodePage: React.FC = () => {
           <p>No posts yet. Be the first to post!</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div data-testid="node-posts-list" className="space-y-3">
           {posts.map(post => (
             <Link
               key={post.id}
@@ -110,7 +111,7 @@ const NodePage: React.FC = () => {
                   <span className="font-medium">{post.vote_count}</span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-medium text-[#e7e9ea] hover:text-orange-400">
+                  <h3 data-testid="home-node-card-title" className="text-lg font-medium text-[#e7e9ea] hover:text-orange-400">
                     {post.title}
                   </h3>
                   <p className="text-sm text-[#8b929a] mt-1">
@@ -123,7 +124,7 @@ const NodePage: React.FC = () => {
         </div>
       )}
 
-      <Link to="/" className="inline-block text-orange-400 hover:text-orange-300">
+      <Link to="/" data-testid="node-back-home" className="inline-block text-orange-400 hover:text-orange-300">
         ← Back to Home
       </Link>
     </div>

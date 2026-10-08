@@ -34,17 +34,18 @@ const Register: React.FC = () => {
         </p>
         
         {error && (
-          <div className="bg-red-900/20 border border-red-500/50 text-red-400 px-4 py-3 rounded mb-4">
+          <div data-testid="auth-error" className="bg-red-900/20 border border-red-500/50 text-red-400 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form data-testid="auth-register-form" onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-[#8b929a] mb-1">
               Invite Code
             </label>
             <input
+              data-testid="auth-invite-code"
               type="text"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -59,6 +60,7 @@ const Register: React.FC = () => {
               Username
             </label>
             <input
+              data-testid="auth-username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -74,6 +76,7 @@ const Register: React.FC = () => {
               Email
             </label>
             <input
+              data-testid="auth-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -87,6 +90,7 @@ const Register: React.FC = () => {
               Password
             </label>
             <input
+              data-testid="auth-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -97,6 +101,7 @@ const Register: React.FC = () => {
           </div>
 
           <button
+            data-testid="auth-submit"
             type="submit"
             disabled={isLoading}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 text-white py-2 rounded-lg font-medium transition-colors"

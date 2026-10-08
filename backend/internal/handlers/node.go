@@ -138,7 +138,9 @@ func (h *NodeHandler) DeleteNode(c *gin.Context) {
 	}
 
 	// Check if user is host or admin
-	if node.HostID != userID && !isAdmin(c) {
+	userRole, _ := c.Get("user_role")
+	isAdmin := userRole == "admin"
+	if node.HostID != userID && !isAdmin {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized"})
 		return
 	}

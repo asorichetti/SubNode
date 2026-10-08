@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/asorichetti/subnode/backend/internal/config"
 	"github.com/asorichetti/subnode/backend/internal/database"

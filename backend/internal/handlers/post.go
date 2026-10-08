@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/asorichetti/subnode/backend/internal/models"
@@ -42,7 +41,11 @@ type VoteRequest struct {
 // CreatePost creates a new post in a node
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	slug := c.Param("slug")
-	authorID, _ := c.Get("user_id")
+	authorID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authenticated"})
+		return
+	}
 
 	// Check if node exists
 	var node models.Node
@@ -75,6 +78,10 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		h.addTagsToPost(c, post.ID, req.Tags)
 	}
 
+	// Load author
+	var author models.User
+	h.DB.First(&author, post.AuthorID)
+
 	c.JSON(http.StatusCreated, PostResponse{
 		ID:        post.ID,
 		NodeID:    post.NodeID,
@@ -83,6 +90,12 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		Body:      post.Body,
 		URL:       post.URL,
 		VoteCount: post.VoteCount,
+		Author: UserResponse{
+			ID:       author.ID,
+			Username: author.Username,
+			Email:    author.Email,
+			Role:     author.Role,
+		},
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 	})
@@ -190,7 +203,9 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 	}
 
 	// Check if user is author or admin
-	if post.AuthorID != userID && !isAdmin(c) {
+	userRole, _ := c.Get("user_role")
+	isAdmin := userRole == "admin"
+	if post.AuthorID != userID && !isAdmin {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized"})
 		return
 	}
@@ -205,12 +220,28 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 
 // VotePost handles voting on a post
 func (h *PostHandler) VotePost(c *gin.Context) {
-	postID := c.Param("id")
-	userID, _ := c.Get("user_id")
+	postIDStr := c.Param("id")
+	postID, err := uuid.Parse(postIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+		return
+	}
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authenticated"})
+		return
+	}
 	var req VoteRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Check if post exists
+	var post models.Post
+	if err := h.DB.First(&post, postID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
 
@@ -221,24 +252,26 @@ func (h *PostHandler) VotePost(c *gin.Context) {
 		if existingVote.VoteType == req.Vote {
 			// Remove vote
 			h.DB.Delete(&existingVote)
-			h.recalculateVoteCount(postID, "post")
+			h.recalculateVoteCount(postID)
 			c.JSON(http.StatusOK, gin.H{"message": "Vote removed"})
 			return
 		}
 		// Update vote
 		existingVote.VoteType = req.Vote
 		h.DB.Save(&existingVote)
-	} else {
-		// Create new vote
-		vote := models.Vote{
-			UserID:   userID.(uuid.UUID),
-			PostID:   &postID,
-			VoteType: req.Vote,
-		}
-		h.DB.Create(&vote)
+		h.recalculateVoteCount(postID)
+		c.JSON(http.StatusOK, gin.H{"message": "Vote updated"})
+		return
 	}
 
-	h.recalculateVoteCount(postID, "post")
+	// Create new vote
+	vote := models.Vote{
+		UserID:   userID.(uuid.UUID),
+		PostID:   &postID,
+		VoteType: req.Vote,
+	}
+	h.DB.Create(&vote)
+	h.recalculateVoteCount(postID)
 	c.JSON(http.StatusOK, gin.H{"message": "Vote recorded"})
 }
 
@@ -256,9 +289,11 @@ func (h *PostHandler) addTagsToPost(c *gin.Context, postID uuid.UUID, tags []str
 	}
 }
 
-func (h *PostHandler) recalculateVoteCount(id string, targetType string) {
-	// Simplified vote recalculation
-	// In production, use a more efficient approach with proper types
-	_ = targetType
-	_, _ = id, targetType
+func (h *PostHandler) recalculateVoteCount(postID uuid.UUID) {
+	var upVotes, downVotes int64
+	h.DB.Model(&models.Vote{}).Where("post_id = ? AND vote_type = 'up'", postID).Count(&upVotes)
+	h.DB.Model(&models.Vote{}).Where("post_id = ? AND vote_type = 'down'", postID).Count(&downVotes)
+	newCount := int(upVotes - downVotes)
+
+	h.DB.Model(&models.Post{}).Where("id = ?", postID).Update("vote_count", newCount)
 }

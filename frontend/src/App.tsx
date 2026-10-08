@@ -9,6 +9,7 @@ import NodePage from './pages/NodePage'
 import PostPage from './pages/PostPage'
 import Dashboard from './pages/Dashboard'
 import NotFound from './pages/NotFound'
+import BrokenPage from './pages/BrokenPage'
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth()
@@ -28,6 +29,7 @@ const AppRoutes: React.FC = () => {
           <Dashboard />
         </ProtectedRoute>
       } />
+      <Route path="/broken" element={<BrokenPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
@@ -39,7 +41,7 @@ const App: React.FC = () => {
       <Router>
         <div className="min-h-screen bg-[#0f1419]">
           <Header />
-          <main className="container mx-auto px-4 py-6 max-w-6xl">
+          <main data-testid="page-content" className="container mx-auto px-4 py-6 max-w-6xl">
             <AppRoutes />
           </main>
         </div>

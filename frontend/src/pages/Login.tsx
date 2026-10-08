@@ -29,17 +29,18 @@ const Login: React.FC = () => {
         <h1 className="text-2xl font-bold mb-6 text-center">Welcome Back</h1>
         
         {error && (
-          <div className="bg-red-900/20 border border-red-500/50 text-red-400 px-4 py-3 rounded mb-4">
+          <div data-testid="auth-error" className="bg-red-900/20 border border-red-500/50 text-red-400 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form data-testid="auth-login-form" onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-[#8b929a] mb-1">
               Username
             </label>
             <input
+              data-testid="auth-username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -53,6 +54,7 @@ const Login: React.FC = () => {
               Password
             </label>
             <input
+              data-testid="auth-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -62,6 +64,7 @@ const Login: React.FC = () => {
           </div>
 
           <button
+            data-testid="auth-submit"
             type="submit"
             disabled={isLoading}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 text-white py-2 rounded-lg font-medium transition-colors"
