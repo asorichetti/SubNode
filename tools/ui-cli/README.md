@@ -149,6 +149,7 @@ cd tools/ui-cli
 - [x] `gofmt -l .` is clean
 - [x] `journey --list` prints all journeys
 - [x] All commands work and write bundles
+- [x] **26/26 journeys pass** with `--ux-gates off`
 - [ ] All journeys pass with `--ux-gates fail`
 - [ ] Gates proven to fire on broken page (§8)
-- [ ] README documents setup and commands
+- [x] README documents setup and commands
