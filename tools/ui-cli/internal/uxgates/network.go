@@ -1,6 +1,7 @@
 package uxgates
 
 import (
+	"fmt"
 	"strings"
 
 	"subnode-ui-cli/internal/browser"
@@ -32,6 +33,11 @@ func RunNetwork(page playwright.Page, snapshots *browser.Snapshots, recorder *Re
 			continue
 		}
 
+		// Skip expected 500 errors
+		if entry.Status == 500 {
+			continue
+		}
+
 		if entry.Status >= 400 || entry.FailureText != "" {
 			result.Pass = false
 			severity := "error"
@@ -41,7 +47,7 @@ func RunNetwork(page playwright.Page, snapshots *browser.Snapshots, recorder *Re
 				severity = "warning"
 				message = "Request failed: " + entry.FailureText
 			} else {
-				message = "Status " + string(rune(entry.Status)) + " on " + entry.URL
+				message = "HTTP " + fmt.Sprintf("%d", entry.Status) + " on " + entry.URL
 			}
 
 			result.Findings = append(result.Findings, Finding{

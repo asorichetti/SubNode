@@ -16,9 +16,9 @@ const Home: React.FC = () => {
     <div className="space-y-6">
       {/* Hero Section */}
       <div data-testid="home-hero" className="text-center py-12 bg-gradient-to-b from-[#1a1f2b] to-transparent rounded-2xl">
-        <h1 data-testid="home-hero-title" className="text-4xl md:text-5xl font-bold mb-4">
+        <h2 data-testid="home-hero-title" className="text-4xl md:text-5xl font-bold mb-4">
           Your Community, <span className="text-orange-500">Your Rules</span>
-        </h1>
+        </h2>
         <p data-testid="home-hero-description" className="text-[#8b929a] text-lg max-w-2xl mx-auto">
           SubNode is a self-hosted, invite-only community platform. 
           Join your community's node to start posting and discussing.
