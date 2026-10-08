@@ -1,18 +1,27 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
+	"github.com/asorichetti/subnode/backend/internal/jwt"
 	"github.com/asorichetti/subnode/backend/internal/models"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type AuthMiddleware struct {
-	DB *gorm.DB
+	DB       *gorm.DB
+	tokenGen *jwt.TokenGenerator
+}
+
+// NewAuthMiddleware creates a new AuthMiddleware with JWT support
+func NewAuthMiddleware(db *gorm.DB, secretKey string, expiry time.Duration) *AuthMiddleware {
+	return &AuthMiddleware{
+		DB:       db,
+		tokenGen: jwt.NewTokenGenerator(secretKey, expiry),
+	}
 }
 
 // JWTAuth validates JWT tokens and sets user context
@@ -35,9 +44,8 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 
 		token := parts[1]
 
-		// Simplified token validation
-		// In production, use proper JWT library (jwt-go, etc.)
-		userID, err := m.validateToken(token)
+		// Validate JWT token
+		claims, err := m.tokenGen.ValidateToken(token)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			c.Abort()
@@ -46,7 +54,7 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 
 		// Load user from database
 		var user models.User
-		if err := m.DB.First(&user, userID).Error; err != nil {
+		if err := m.DB.First(&user, claims.UserID).Error; err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 			c.Abort()
 			return
@@ -84,21 +92,4 @@ func (m *AuthMiddleware) RequireModerator() gin.HandlerFunc {
 		}
 		c.Next()
 	}
-}
-
-// validateToken extracts user ID from token
-// This is a simplified version - replace with proper JWT validation
-func (m *AuthMiddleware) validateToken(token string) (uuid.UUID, error) {
-	// Simple token format: userID.username.secret
-	parts := strings.Split(token, ".")
-	if len(parts) != 3 {
-		return uuid.Nil, fmt.Errorf("invalid token format")
-	}
-
-	userID, err := uuid.Parse(parts[0])
-	if err != nil {
-		return uuid.Nil, fmt.Errorf("invalid user ID in token")
-	}
-
-	return userID, nil
 }

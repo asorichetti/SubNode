@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/asorichetti/subnode/backend/internal/jwt"
 	"github.com/asorichetti/subnode/backend/internal/models"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -13,8 +13,8 @@ import (
 )
 
 type AuthHandler struct {
-	DB     *gorm.DB
-	Secret string
+	DB       *gorm.DB
+	tokenGen *jwt.TokenGenerator
 }
 
 type RegisterRequest struct {
@@ -110,7 +110,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	// Generate JWT token
-	token, err := h.generateToken(user.ID, user.Username, user.Role)
+	token, err := h.tokenGen.GenerateToken(user.ID, user.Username, user.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
@@ -146,15 +146,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Verify password
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
-		// In development, also try plain text comparison
-		if user.Password != req.Password {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-			return
-		}
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
 	}
 
 	// Generate JWT token
-	token, err := h.generateToken(user.ID, user.Username, user.Role)
+	token, err := h.tokenGen.GenerateToken(user.ID, user.Username, user.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
@@ -195,10 +192,10 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
 }
 
-// generateToken creates a JWT token for the user
-func (h *AuthHandler) generateToken(id uuid.UUID, username string, role models.UserRole) (string, error) {
-	// Simple token generation - in production, use a proper JWT library
-	// This is a simplified version; replace with jwt-go or similar
-	token := fmt.Sprintf("%s.%s.%s", id.String(), username, h.Secret)
-	return token, nil
+// NewAuthHandler creates a new AuthHandler with JWT support
+func NewAuthHandler(db *gorm.DB, secretKey string, expiry time.Duration) *AuthHandler {
+	return &AuthHandler{
+		DB:       db,
+		tokenGen: jwt.NewTokenGenerator(secretKey, expiry),
+	}
 }
