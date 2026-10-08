@@ -261,6 +261,15 @@ jobs:
           cd tools/ui-cli
           go build -o /tmp/ui-cli .
           
+          # Wait for backend to be ready
+          for i in {1..10}; do
+            if curl -sf http://localhost:8080/health > /dev/null 2>&1; then
+              echo "Backend is ready"
+              break
+            fi
+            sleep 1
+          done
+          
           echo "=== REGRESSION SWEEP ==="
           echo "Running all 28 journeys with UX gates enabled..."
           echo ""
