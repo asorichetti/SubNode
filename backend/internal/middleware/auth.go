@@ -12,8 +12,8 @@ import (
 )
 
 type AuthMiddleware struct {
-	DB        *gorm.DB
-	tokenGen  *jwt.TokenGenerator
+	DB       *gorm.DB
+	tokenGen *jwt.TokenGenerator
 }
 
 // NewAuthMiddleware creates a new AuthMiddleware with JWT support

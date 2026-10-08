@@ -11,8 +11,8 @@ import (
 
 // Claims represents JWT claims with user information
 type Claims struct {
-	UserID   uuid.UUID    `json:"user_id"`
-	Username string       `json:"username"`
+	UserID   uuid.UUID       `json:"user_id"`
+	Username string          `json:"username"`
 	Role     models.UserRole `json:"role"`
 	jwt.RegisteredClaims
 }
