@@ -1,0 +1,286 @@
+name: CI - Tests & Regression
+
+on:
+  push:
+    branches: [ main, interactive-test-tooling ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # =====================================================================
+  # BACKEND BUILD & LINT
+  # =====================================================================
+  backend-lint:
+    name: Backend Lint & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+          cache-dependency-path: backend/go.sum
+
+      - name: Install dependencies
+        run: cd backend && go mod download
+
+      - name: Run go vet
+        run: cd backend && go vet ./...
+
+      - name: Run gofmt check
+        run: |
+          UNSORTED=$(gofmt -l ./backend/internal/)
+          if [ -n "$UNSORTED" ]; then
+            echo "Files not gofmt:"
+            echo "$UNSORTED"
+            exit 1
+          fi
+
+      - name: Build backend
+        run: cd backend && go build ./...
+
+  # =====================================================================
+  # FRONTEND BUILD
+  # =====================================================================
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Build frontend
+        run: cd frontend && npm run build
+
+  # =====================================================================
+  # UI-CLI BUILD
+  # =====================================================================
+  ui-cli-build:
+    name: UI-CLI Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+          cache-dependency-path: tools/ui-cli/go.sum
+
+      - name: Install dependencies
+        run: cd tools/ui-cli && go mod download
+
+      - name: Build UI-CLI
+        run: cd tools/ui-cli && go build -o /tmp/ui-cli .
+
+      - name: List journeys
+        run: /tmp/ui-cli journey --list
+
+  # =====================================================================
+  # JOURNEY TESTS (with Docker Compose)
+  # =====================================================================
+  journey-tests:
+    name: Journey Tests (all suites)
+    runs-on: ubuntu-latest
+    needs: [backend-lint, frontend-build]
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: subnode
+          POSTGRES_PASSWORD: subnode
+          POSTGRES_DB: subnode
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U subnode"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+          cache-dependency-path: tools/ui-cli/go.sum
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend deps
+        run: cd frontend && npm ci
+
+      - name: Build frontend
+        run: cd frontend && npm run build
+
+      - name: Install backend deps & seed database
+        run: |
+          cd backend && go mod download
+          go run ./cmd/seed main.go || true
+
+      - name: Start backend server
+        run: |
+          cd backend && go run ./cmd/server &
+          sleep 3
+          # Wait for health endpoint
+          for i in {1..10}; do
+            curl -sf http://localhost:8080/health && break
+            sleep 1
+          done
+
+      - name: Install Playwright browsers
+        run: cd tools/ui-cli && npx playwright install --with-deps chromium
+
+      - name: Run journey tests --ux-gates off
+        run: |
+          cd tools/ui-cli
+          go build -o /tmp/ui-cli .
+          /tmp/ui-cli journey --ux-gates off
+
+      - name: Run journey tests --ux-gates warn
+        run: |
+          cd tools/ui-cli
+          /tmp/ui-cli journey --ux-gates warn
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: journey-screenshots
+          path: tools/ui-cli/screenshots/
+
+  # =====================================================================
+  # REGRESSION SWEEP
+  # =====================================================================
+  regression-sweep:
+    name: Regression Sweep
+    runs-on: ubuntu-latest
+    needs: [backend-lint, frontend-build]
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: subnode
+          POSTGRES_PASSWORD: subnode
+          POSTGRES_DB: subnode
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U subnode"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+          cache-dependency-path: tools/ui-cli/go.sum
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        run: |
+          cd frontend && npm ci
+          cd ../backend && go mod download
+
+      - name: Seed database & start backend
+        run: |
+          cd backend
+          go run ./cmd/seed main.go || true
+          go run ./cmd/server &
+          sleep 3
+          for i in {1..10}; do
+            curl -sf http://localhost:8080/health && break
+            sleep 1
+          done
+
+      - name: Install Playwright browsers
+        run: cd tools/ui-cli && npx playwright install --with-deps chromium
+
+      - name: Run full regression sweep
+        run: |
+          cd tools/ui-cli
+          go build -o /tmp/ui-cli .
+          
+          echo "=== REGRESSION SWEEP ==="
+          echo "Running all 28 journeys with UX gates enabled..."
+          echo ""
+          
+          # Run with warn mode (catches issues but doesn't fail)
+          WARN_OUTPUT=$(/tmp/ui-cli journey --ux-gates warn 2>&1)
+          WARN_EXIT=$?
+          
+          # Run with off mode (baseline)
+          OFF_OUTPUT=$(/tmp/ui-cli journey --ux-gates off 2>&1)
+          OFF_EXIT=$?
+          
+          echo ""
+          echo "=== RESULTS ==="
+          echo "With --ux-gates warn: exit $WARN_EXIT"
+          echo "With --ux-gates off:  exit $OFF_EXIT"
+          
+          # Count passing journeys
+          PASS_WARN=$(echo "$WARN_OUTPUT" | grep -c "✓ Journey.*passed" || echo "0")
+          PASS_OFF=$(echo "$OFF_OUTPUT" | grep -c "✓ Journey.*passed" || echo "0")
+          
+          echo "Passed with warn: $PASS_WARN/28"
+          echo "Passed with off:  $PASS_OFF/28"
+          
+          # Fail if baseline fails
+          if [ "$OFF_EXIT" -ne 0 ]; then
+            echo ""
+            echo "❌ BASELINE FAILURE: Journeys failing with gates disabled"
+            echo "$OFF_OUTPUT" | tail -20
+            exit 1
+          fi
+          
+          # Warn if warn mode has failures
+          if [ "$WARN_EXIT" -ne 0 ]; then
+            echo ""
+            echo "⚠️  WARNING: Some journeys failing with UX gates enabled"
+            echo "$WARN_OUTPUT" | grep -A2 "Gate failures:" || true
+          fi
+          
+          # Report gate findings to artifacts
+          mkdir -p regression-results
+          echo "$WARN_OUTPUT" > regression-results/warn.txt
+          echo "$OFF_OUTPUT" > regression-results/off.txt
+          
+        continue-on-error: false
+
+      - name: Upload regression results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-results
+          path: regression-results/
