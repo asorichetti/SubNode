@@ -9,6 +9,7 @@ import NodePage from './pages/NodePage'
 import PostPage from './pages/PostPage'
 import Dashboard from './pages/Dashboard'
 import NotFound from './pages/NotFound'
+import BrokenPage from './pages/BrokenPage'
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth()
@@ -28,6 +29,7 @@ const AppRoutes: React.FC = () => {
           <Dashboard />
         </ProtectedRoute>
       } />
+      <Route path="/broken" element={<BrokenPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )

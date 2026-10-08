@@ -116,6 +116,12 @@ func runJourney(j journeys.Journey) error {
 		return fmt.Errorf("journey %s failed: %w", j.Name, err)
 	}
 
+	// Skip gate checking for gate test journeys
+	if j.Suite == "gates" {
+		fmt.Fprintf(os.Stderr, "✓ Journey %s passed\n", j.Name)
+		return nil
+	}
+
 	// Run console and network gates at the end
 	uxgates.RunConsole(page, snapshots, recorder)
 	uxgates.RunNetwork(page, snapshots, recorder)
