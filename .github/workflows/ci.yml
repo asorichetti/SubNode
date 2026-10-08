@@ -138,6 +138,9 @@ jobs:
           cd backend && go mod download
           go run ./cmd/seed main.go || true
 
+      - name: Install Playwright browsers
+        run: cd tools/ui-cli && npx playwright install --with-deps chromium
+
       - name: Start backend server
         run: |
           cd backend && go run ./cmd/server &
