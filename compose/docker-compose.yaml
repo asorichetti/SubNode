@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: subnode
+      POSTGRES_PASSWORD: subnode
+      POSTGRES_DB: subnode
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U subnode"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    environment:
+      DB_DRIVER: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: subnode
+      DB_USER: subnode
+      DB_PASSWORD: subnode
+      JWT_SECRET: dev-secret-change-me
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Frontend
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend/src:/app/src
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:

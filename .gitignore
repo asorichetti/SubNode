@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+vendor/
+backend/vendor/
+
+# Build outputs
+bin/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+*.out
+
+# Vite
+.vite/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.sum
+
+# TypeScript
+*.tsbuildinfo
+
+# Docker
+!.dockerignore
+
+# Helm
+*.tgz
+.helm/cache/
+.helm/repository/
+
+# Production database
+subnode.db
