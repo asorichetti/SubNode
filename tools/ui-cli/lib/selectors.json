@@ -1,0 +1,77 @@
+{
+  "pagestate": {
+    "content": "page-content",
+    "error": "page-error"
+  },
+  "nav": {
+    "root": "nav-root",
+    "home": "nav-home",
+    "login": "nav-login",
+    "register": "nav-register",
+    "dashboard": "nav-dashboard",
+    "logout": "nav-logout"
+  },
+  "auth": {
+    "loginForm": "auth-login-form",
+    "username": "auth-username",
+    "password": "auth-password",
+    "submit": "auth-submit",
+    "registerForm": "auth-register-form",
+    "email": "auth-email",
+    "inviteCode": "auth-invite-code",
+    "error": "auth-error",
+    "success": "auth-success"
+  },
+  "home": {
+    "hero": "home-hero",
+    "heroTitle": "home-hero-title",
+    "heroDescription": "home-hero-description",
+    "nodesList": "home-nodes-list",
+    "nodeCard": "home-node-card",
+    "nodeCardTitle": "home-node-card-title"
+  },
+  "node": {
+    "header": "node-header",
+    "pageTitle": "node-page-title",
+    "description": "node-description",
+    "rules": "node-rules",
+    "postsList": "node-posts-list",
+    "newPostBtn": "node-new-post-btn",
+    "backToHome": "node-back-home"
+  },
+  "post": {
+    "header": "post-header",
+    "title": "post-title",
+    "body": "post-body",
+    "author": "post-author",
+    "voteUp": "post-vote-up",
+    "voteDown": "post-vote-down",
+    "voteCount": "post-vote-count",
+    "comments": "post-comments",
+    "backToNode": "post-back-to-node"
+  },
+  "dashboard": {
+    "header": "dashboard-header",
+    "userGreeting": "dashboard-user-greeting",
+    "inviteCodesList": "dashboard-invite-codes",
+    "newInviteBtn": "dashboard-new-invite",
+    "createInviteForm": "dashboard-create-invite-form",
+    "maxUses": "dashboard-max-uses",
+    "role": "dashboard-role",
+    "generateBtn": "dashboard-generate-btn",
+    "copyBtn": "dashboard-copy-btn",
+    "revokeBtn": "dashboard-revoke-btn",
+    "stats": "dashboard-stats",
+    "totalInvites": "dashboard-total-invites",
+    "activeInvites": "dashboard-active-invites",
+    "totalUses": "dashboard-total-uses"
+  },
+  "common": {
+    "header": "common-header",
+    "footer": "common-footer",
+    "skipLink": "skip-link",
+    "loading": "common-loading",
+    "error": "common-error",
+    "notFound": "common-not-found"
+  }
+}
