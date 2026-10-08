@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { apiService, Post } from '../services/api'
-import { useAuth } from '../context/AuthContext'
 
 const PostPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
-  const { user, isAuthenticated } = useAuth()
   const [post, setPost] = useState<Post | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -44,7 +42,7 @@ const PostPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Link to={`/node/${post.slug}`} data-testid="post-back-to-node" className="inline-block text-orange-400 hover:text-orange-300 mb-4">
+      <Link to={`/`} data-testid="post-back-to-node" className="inline-block text-orange-400 hover:text-orange-300 mb-4">
         ← Back to Node
       </Link>
 

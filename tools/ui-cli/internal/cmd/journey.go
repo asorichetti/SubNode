@@ -129,7 +129,7 @@ func runJourney(j journeys.Journey) error {
 	if recorder.Failed() && uxGates != "off" {
 		fmt.Fprintf(os.Stderr, "\n⚠️ Gate failures:\n")
 		for _, finding := range recorder.Findings() {
-			fmt.Fprintf(os.Stderr, "  - [%s] %s\n", finding.Gate, finding.Message)
+			fmt.Fprintf(os.Stderr, "  - [%s] %s: %s\n", finding.Gate, finding.Severity, finding.Message)
 		}
 		return fmt.Errorf("journey %s failed: gate failures detected", j.Name)
 	}

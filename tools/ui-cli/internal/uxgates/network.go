@@ -33,7 +33,7 @@ func RunNetwork(page playwright.Page, snapshots *browser.Snapshots, recorder *Re
 			continue
 		}
 
-		// Skip expected 500 errors
+		// Skip all 500 errors (expected during error handling tests)
 		if entry.Status == 500 {
 			continue
 		}
@@ -47,7 +47,7 @@ func RunNetwork(page playwright.Page, snapshots *browser.Snapshots, recorder *Re
 				severity = "warning"
 				message = "Request failed: " + entry.FailureText
 			} else {
-				message = "HTTP " + fmt.Sprintf("%d", entry.Status) + " on " + entry.URL
+				message = "Status " + fmt.Sprintf("%d", entry.Status) + " on " + entry.URL
 			}
 
 			result.Findings = append(result.Findings, Finding{

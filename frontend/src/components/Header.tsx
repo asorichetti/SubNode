@@ -16,7 +16,7 @@ const Header: React.FC = () => {
             <span className="text-xl font-bold text-[#e7e9ea]">SubNode</span>
           </Link>
 
-          <nav data-testid="nav-main" className="flex items-center space-x-4" aria-label="Main navigation">
+          <nav aria-label="Main navigation" className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
                 <Link

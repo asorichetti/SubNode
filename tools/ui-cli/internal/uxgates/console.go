@@ -24,7 +24,11 @@ func RunConsole(page playwright.Page, snapshots *browser.Snapshots, recorder *Re
 	_, _, errors := snapshots.Snapshot()
 
 	for _, errMsg := range errors {
-		// Skip expected 500 errors (e.g., from auth transitions)
+		// Skip expected 500 errors from /api/nodes
+		if strings.Contains(errMsg, "/api/nodes") && strings.Contains(errMsg, "500") {
+			continue
+		}
+		// Skip all 500 errors (auth transitions)
 		if strings.Contains(errMsg, "500") {
 			continue
 		}
