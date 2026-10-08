@@ -28,15 +28,15 @@ interface RegisterRequest {
 }
 
 class AuthService {
-  private getToken(): string | null {
+  getToken(): string | null {
     return localStorage.getItem('token')
   }
 
-  private setToken(token: string): void {
+  setToken(token: string): void {
     localStorage.setItem('token', token)
   }
 
-  private removeToken(): void {
+  removeToken(): void {
     localStorage.removeItem('token')
   }
 

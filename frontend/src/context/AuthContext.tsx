@@ -36,12 +36,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [])
 
   const login = async (username: string, password: string) => {
-    const response = await authService.login(username, password)
+    const response = await authService.login({ username, password })
     setUser(response.user)
   }
 
   const register = async (username: string, email: string, password: string, code: string) => {
-    const response = await authService.register(username, email, password, code)
+    const response = await authService.register({ username, email, password, code })
     setUser(response.user)
   }
 
