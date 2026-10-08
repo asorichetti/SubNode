@@ -21,9 +21,9 @@ type User struct {
 type UserRole string
 
 const (
-	RoleAdmin    UserRole = "admin"
+	RoleAdmin     UserRole = "admin"
 	RoleModerator UserRole = "moderator"
-	RoleMember   UserRole = "member"
+	RoleMember    UserRole = "member"
 )
 
 // Node represents a community/cluster (like a subreddit)
@@ -37,26 +37,26 @@ type Node struct {
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 
-	Host    User       `gorm:"foreignKey:HostID"`
-	Members []User     `gorm:"many2many:user_nodes;"`
-	Posts   []Post     `gorm:"foreignKey:NodeID"`
+	Host    User   `gorm:"foreignKey:HostID"`
+	Members []User `gorm:"many2many:user_nodes;"`
+	Posts   []Post `gorm:"foreignKey:NodeID"`
 }
 
 // Post represents a submission to a node
 type Post struct {
-	ID        uuid.UUID      `gorm:"type:uuid;default:gen_random_uuid()"`
-	NodeID    uuid.UUID      `gorm:"type:uuid;not null"`
-	AuthorID  uuid.UUID      `gorm:"type:uuid;not null"`
-	Title     string         `gorm:"not null;size:300"`
-	Body      string         `gorm:"type:text"`
-	URL       *string        `gorm:"size:500"`
-	VoteCount int            `gorm:"default:0"`
-	CreatedAt time.Time      `gorm:"autoCreateTime"`
-	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
-	DeletedAt *time.Time     `gorm:"index"`
+	ID        uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid()"`
+	NodeID    uuid.UUID  `gorm:"type:uuid;not null"`
+	AuthorID  uuid.UUID  `gorm:"type:uuid;not null"`
+	Title     string     `gorm:"not null;size:300"`
+	Body      string     `gorm:"type:text"`
+	URL       *string    `gorm:"size:500"`
+	VoteCount int        `gorm:"default:0"`
+	CreatedAt time.Time  `gorm:"autoCreateTime"`
+	UpdatedAt time.Time  `gorm:"autoUpdateTime"`
+	DeletedAt *time.Time `gorm:"index"`
 
-	Node   Node   `gorm:"foreignKey:NodeID"`
-	Author User   `gorm:"foreignKey:AuthorID"`
+	Node     Node      `gorm:"foreignKey:NodeID"`
+	Author   User      `gorm:"foreignKey:AuthorID"`
 	Comments []Comment `gorm:"foreignKey:PostID"`
 }
 
@@ -72,22 +72,22 @@ type Comment struct {
 	UpdatedAt time.Time  `gorm:"autoUpdateTime"`
 	DeletedAt *time.Time `gorm:"index"`
 
-	Post   Post     `gorm:"foreignKey:PostID"`
-	Author User     `gorm:"foreignKey:AuthorID"`
-	Parent *Comment `gorm:"foreignKey:ParentID"`
+	Post    Post      `gorm:"foreignKey:PostID"`
+	Author  User      `gorm:"foreignKey:AuthorID"`
+	Parent  *Comment  `gorm:"foreignKey:ParentID"`
 	Replies []Comment `gorm:"foreignKey:ParentID"`
 }
 
 // Vote represents a user's vote on a post or comment
 type Vote struct {
-	ID         uuid.UUID `gorm:"type:uuid;default:gen_random_uuid()"`
-	UserID     uuid.UUID `gorm:"type:uuid;not null"`
-	PostID     *uuid.UUID `gorm:"type:uuid"`
-	CommentID  *uuid.UUID `gorm:"type:uuid"`
-	VoteType   VoteType  `gorm:"not null"`
-	CreatedAt  time.Time `gorm:"autoCreateTime"`
+	ID        uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid()"`
+	UserID    uuid.UUID  `gorm:"type:uuid;not null"`
+	PostID    *uuid.UUID `gorm:"type:uuid"`
+	CommentID *uuid.UUID `gorm:"type:uuid"`
+	VoteType  VoteType   `gorm:"not null"`
+	CreatedAt time.Time  `gorm:"autoCreateTime"`
 
-	User   User  `gorm:"foreignKey:UserID"`
+	User User `gorm:"foreignKey:UserID"`
 }
 
 // VoteType represents the type of vote
@@ -100,14 +100,14 @@ const (
 
 // InviteCode represents an invite code for joining the instance
 type InviteCode struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid()"`
-	Code      string    `gorm:"unique;not null;size:20"`
-	HostID    uuid.UUID `gorm:"type:uuid;not null"`
-	MaxUses   int       `gorm:"default:1"`
-	Uses      int       `gorm:"default:0"`
+	ID        uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid()"`
+	Code      string     `gorm:"unique;not null;size:20"`
+	HostID    uuid.UUID  `gorm:"type:uuid;not null"`
+	MaxUses   int        `gorm:"default:1"`
+	Uses      int        `gorm:"default:0"`
 	ExpiresAt *time.Time `gorm:"index"`
-	Role      UserRole  `gorm:"default:member"`
-	CreatedAt time.Time `gorm:"autoCreateTime"`
+	Role      UserRole   `gorm:"default:member"`
+	CreatedAt time.Time  `gorm:"autoCreateTime"`
 	DeletedAt *time.Time `gorm:"index"`
 
 	Host User `gorm:"foreignKey:HostID"`

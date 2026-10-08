@@ -17,19 +17,19 @@ type InviteHandler struct {
 }
 
 type CreateInviteRequest struct {
-	MaxUses int            `json:"max_uses" binding:"omitempty,min=1"`
-	Expires *time.Time     `json:"expires,omitempty"`
+	MaxUses int             `json:"max_uses" binding:"omitempty,min=1"`
+	Expires *time.Time      `json:"expires,omitempty"`
 	Role    models.UserRole `json:"role" binding:"omitempty,oneof=member moderator"`
 }
 
 type InviteResponse struct {
-	ID        uuid.UUID     `json:"id"`
-	Code      string        `json:"code"`
-	MaxUses   int           `json:"max_uses"`
-	Uses      int           `json:"uses"`
-	ExpiresAt *time.Time    `json:"expires_at,omitempty"`
+	ID        uuid.UUID       `json:"id"`
+	Code      string          `json:"code"`
+	MaxUses   int             `json:"max_uses"`
+	Uses      int             `json:"uses"`
+	ExpiresAt *time.Time      `json:"expires_at,omitempty"`
 	Role      models.UserRole `json:"role"`
-	CreatedAt time.Time     `json:"created_at"`
+	CreatedAt time.Time       `json:"created_at"`
 }
 
 // CreateInvite generates a new invite code (admin/mod only)

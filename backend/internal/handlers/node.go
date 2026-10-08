@@ -22,14 +22,14 @@ type CreateNodeRequest struct {
 }
 
 type NodeResponse struct {
-	ID          uuid.UUID     `json:"id"`
-	Name        string        `json:"name"`
-	Slug        string        `json:"slug"`
-	Description string        `json:"description"`
-	Rules       string        `json:"rules"`
-	HostID      uuid.UUID     `json:"host_id"`
-	CreatedAt   time.Time     `json:"created_at"`
-	UpdatedAt   time.Time     `json:"updated_at"`
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Slug        string    `json:"slug"`
+	Description string    `json:"description"`
+	Rules       string    `json:"rules"`
+	HostID      uuid.UUID `json:"host_id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 // CreateNode creates a new node (admin only)

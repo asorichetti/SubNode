@@ -18,19 +18,19 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	Driver      string // "postgres" or "sqlite"
-	Host        string
-	Port        string
-	Name        string
-	User        string
-	Password    string
-	SSLMode     string
-	SQLitePath  string // For SQLite mode
+	Driver     string // "postgres" or "sqlite"
+	Host       string
+	Port       string
+	Name       string
+	User       string
+	Password   string
+	SSLMode    string
+	SQLitePath string // For SQLite mode
 }
 
 type AuthConfig struct {
-	JWTSecret     string
-	TokenExpiry   int // minutes
+	JWTSecret   string
+	TokenExpiry int // minutes
 }
 
 func Load() *Config {

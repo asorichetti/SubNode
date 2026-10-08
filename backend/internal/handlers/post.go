@@ -22,16 +22,16 @@ type CreatePostRequest struct {
 }
 
 type PostResponse struct {
-	ID        uuid.UUID      `json:"id"`
-	NodeID    uuid.UUID      `json:"node_id"`
-	AuthorID  uuid.UUID      `json:"author_id"`
-	Title     string         `json:"title"`
-	Body      string         `json:"body"`
-	URL       *string        `json:"url,omitempty"`
-	VoteCount int            `json:"vote_count"`
-	Author    UserResponse   `json:"author"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
+	ID        uuid.UUID    `json:"id"`
+	NodeID    uuid.UUID    `json:"node_id"`
+	AuthorID  uuid.UUID    `json:"author_id"`
+	Title     string       `json:"title"`
+	Body      string       `json:"body"`
+	URL       *string      `json:"url,omitempty"`
+	VoteCount int          `json:"vote_count"`
+	Author    UserResponse `json:"author"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
 }
 
 type VoteRequest struct {
