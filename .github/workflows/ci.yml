@@ -133,10 +133,8 @@ jobs:
       - name: Build frontend
         run: cd frontend && npm run build
 
-      - name: Install backend deps & seed database
-        run: |
-          cd backend && go mod download
-          go run ./cmd/seed main.go || true
+      - name: Install backend deps
+        run: cd backend && go mod download
 
       - name: Install Playwright driver & browsers
         run: cd tools/ui-cli && go run github.com/mxschmitt/playwright-go/cmd/playwright@v0.6201.1 install --with-deps
@@ -245,11 +243,9 @@ jobs:
             sleep 1
           done
 
-      - name: Seed database & start backend
+      - name: Start backend server (auto-seeds)
         run: |
-          cd backend
-          go run ./cmd/seed main.go || true
-          go run ./cmd/server &
+          cd backend && go run ./cmd/server &
           sleep 3
           for i in {1..10}; do
             curl -sf http://localhost:8080/health && break

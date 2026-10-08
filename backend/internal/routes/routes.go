@@ -8,14 +8,10 @@ import (
 )
 
 // Setup configures all routes for the application
-func Setup(db *gorm.DB, authMiddleware *middleware.AuthMiddleware) *gin.Engine {
+func Setup(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, authHandler *handlers.AuthHandler) *gin.Engine {
 	r := gin.Default()
 
 	// Initialize handlers
-	authHandler := &handlers.AuthHandler{
-		DB:     db,
-		Secret: "subnode-secret", // TODO: Load from config
-	}
 	inviteHandler := &handlers.InviteHandler{DB: db}
 	nodeHandler := &handlers.NodeHandler{DB: db}
 	postHandler := &handlers.PostHandler{DB: db}

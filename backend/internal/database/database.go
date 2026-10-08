@@ -6,6 +6,7 @@ import (
 	"github.com/asorichetti/subnode/backend/internal/config"
 	"github.com/asorichetti/subnode/backend/internal/models"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -66,12 +67,18 @@ func Seed(db *gorm.DB, cfg *config.Config) error {
 		return nil
 	}
 
+	// Hash the default admin password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
 	// Create default admin user
 	admin := models.User{
 		Username: "admin",
 		Email:    "admin@localhost",
 		Role:     models.RoleAdmin,
-		Password: "admin", // Will be hashed on actual login setup
+		Password: string(hashedPassword),
 	}
 
 	if err := db.Create(&admin).Error; err != nil {
