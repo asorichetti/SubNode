@@ -36,6 +36,7 @@ func Setup(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, authHandler *
 	inviteHandler := &handlers.InviteHandler{DB: db}
 	nodeHandler := &handlers.NodeHandler{DB: db}
 	postHandler := &handlers.PostHandler{DB: db}
+	healthHandler := handlers.NewHealthHandler("1.0.0")
 
 	// Public routes
 	api := r.Group("/api")
@@ -94,9 +95,8 @@ func Setup(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, authHandler *
 	}
 
 	// Health check
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok"})
-	})
+	r.GET("/health", healthHandler.Health)
+	r.GET("/ready", healthHandler.Ready)
 
 	return r
 }
