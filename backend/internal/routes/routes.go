@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"strings"
+	"time"
+
 	"github.com/asorichetti/subnode/backend/internal/handlers"
 	"github.com/asorichetti/subnode/backend/internal/middleware"
 	"github.com/gin-gonic/gin"
@@ -8,8 +11,26 @@ import (
 )
 
 // Setup configures all routes for the application
-func Setup(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, authHandler *handlers.AuthHandler) *gin.Engine {
-	r := gin.Default()
+func Setup(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, authHandler *handlers.AuthHandler, corsOrigins string, rateLimitEnabled bool, rateLimitRequests int, rateLimitWindow time.Duration) *gin.Engine {
+	// Set Gin mode
+	gin.SetMode("release")
+
+	r := gin.New()
+
+	// Add middleware
+	r.Use(gin.Recovery())
+	r.Use(middleware.RequestID())
+	if corsOrigins != "" {
+		origins := strings.Split(corsOrigins, ",")
+		r.Use(middleware.CORS(origins))
+	}
+
+	// Initialize rate limiter
+	var rateLimiter *middleware.RateLimiter
+	if rateLimitEnabled {
+		rateLimiter = middleware.NewRateLimiter(rateLimitRequests, rateLimitWindow)
+		r.Use(middleware.RateLimit(rateLimiter))
+	}
 
 	// Initialize handlers
 	inviteHandler := &handlers.InviteHandler{DB: db}

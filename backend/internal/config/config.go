@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 )
 
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	Auth     AuthConfig
+	Server    ServerConfig
+	Database  DatabaseConfig
+	Auth      AuthConfig
+	CORS      CORSConfig
+	RateLimit RateLimitConfig
 }
 
 type ServerConfig struct {
@@ -33,7 +36,22 @@ type AuthConfig struct {
 	TokenExpiry int // minutes
 }
 
+type CORSConfig struct {
+	AllowedOrigins string // comma-separated list of allowed origins
+}
+
+type RateLimitConfig struct {
+	Enabled  bool
+	Requests int           // max requests per window
+	Window   time.Duration // time window for rate limiting
+}
+
 func Load() *Config {
+	// Parse rate limit config
+	rlEnabled := getEnv("RATE_LIMIT_ENABLED", "true")
+	rlRequests := GetEnvInt("RATE_LIMIT_REQUESTS", 100)
+	rlWindowMinutes := GetEnvInt("RATE_LIMIT_WINDOW", 15)
+
 	return &Config{
 		Server: ServerConfig{
 			Port: getEnv("SERVER_PORT", "8080"),
@@ -52,6 +70,14 @@ func Load() *Config {
 		Auth: AuthConfig{
 			JWTSecret:   getEnv("JWT_SECRET", "change-this-in-production"),
 			TokenExpiry: 60, // 60 minutes
+		},
+		CORS: CORSConfig{
+			AllowedOrigins: getEnv("CORS_ALLOWED_ORIGINS", "*"),
+		},
+		RateLimit: RateLimitConfig{
+			Enabled:  rlEnabled == "true",
+			Requests: rlRequests,
+			Window:   time.Duration(rlWindowMinutes) * time.Minute,
 		},
 	}
 }

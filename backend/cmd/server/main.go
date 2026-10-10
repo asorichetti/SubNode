@@ -38,7 +38,12 @@ func main() {
 	authHandler := handlers.NewAuthHandler(db, cfg.Auth.JWTSecret, tokenExpiry)
 
 	// Setup routes
-	router := routes.Setup(db, authMiddleware, authHandler)
+	router := routes.Setup(db, authMiddleware, authHandler,
+		cfg.CORS.AllowedOrigins,
+		cfg.RateLimit.Enabled,
+		cfg.RateLimit.Requests,
+		cfg.RateLimit.Window,
+	)
 
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.Server.Port)
