@@ -69,7 +69,7 @@ func Load() *Config {
 		},
 		Auth: AuthConfig{
 			JWTSecret:   getEnv("JWT_SECRET", "change-this-in-production"),
-			TokenExpiry: 60, // 60 minutes
+			TokenExpiry: GetEnvInt("JWT_EXPIRY", 60), // 60 minutes
 		},
 		CORS: CORSConfig{
 			AllowedOrigins: getEnv("CORS_ALLOWED_ORIGINS", "*"),
