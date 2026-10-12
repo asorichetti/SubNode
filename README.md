@@ -33,14 +33,38 @@ SubNode brings the best of Reddit-style threading and Lobsters-style technical c
 
 ## 🚀 Quick Start
 
-```bash
-# Deploy to your local cluster
-make deploy
+### Docker Compose (Recommended for Local Dev)
 
-# Access at http://localhost
+```bash
+cd compose
+cp .env.example .env  # Edit with your configuration
+docker-compose up --build
+
+# Or use Makefile
+make dev
 ```
 
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for full setup instructions.
+### Kubernetes
+
+```bash
+# Build and load images
+minikube start
+eval $(minikube docker-env)
+make build-all
+
+# Deploy
+kubectl apply -f k8s/deployment.yaml
+
+# Access
+minikube service frontend -n subnode
+```
+
+## 📚 Documentation
+
+- [API Documentation](docs/API.md) - Complete API reference
+- [Docker Deployment](docs/DOCKER.md) - Docker Compose setup
+- [Kubernetes Deployment](docs/KUBERNETES.md) - K8s setup and scaling
+- [Architecture](docs/ARCHITECTURE.md) - System architecture overview
 
 ## 📁 Project Structure
 
