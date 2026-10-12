@@ -1,25 +1,27 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../components/Toast'
 import { Link } from 'react-router-dom'
 
 const Register: React.FC = () => {
   const { register } = useAuth()
+  const { addToast } = useToast()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [code, setCode] = useState('')
-  const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
     setIsLoading(true)
 
     try {
       await register(username, email, password, code)
+      addToast('Account created successfully!', 'success')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed')
+      const message = err.message || err.details || 'Registration failed. Please check your invite code.'
+      addToast(message, 'error')
     } finally {
       setIsLoading(false)
     }
@@ -32,12 +34,6 @@ const Register: React.FC = () => {
         <p className="text-[#8b929a] text-sm text-center mb-6">
           Enter your invite code to create an account
         </p>
-        
-        {error && (
-          <div data-testid="auth-error" className="bg-red-900/20 border border-red-500/50 text-red-400 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
 
         <form data-testid="auth-register-form" onSubmit={handleSubmit} className="space-y-4">
           <div>

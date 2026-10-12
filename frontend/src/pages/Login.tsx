@@ -1,23 +1,25 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../components/Toast'
 import { Link } from 'react-router-dom'
 
 const Login: React.FC = () => {
   const { login } = useAuth()
+  const { addToast } = useToast()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
     setIsLoading(true)
 
     try {
       await login(username, password)
+      addToast('Successfully logged in!', 'success')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed')
+      const message = err.message || err.details || 'Login failed. Please check your credentials.'
+      addToast(message, 'error')
     } finally {
       setIsLoading(false)
     }
@@ -27,12 +29,6 @@ const Login: React.FC = () => {
     <div className="max-w-md mx-auto mt-12">
       <div className="bg-[#1a1f2b] rounded-lg p-8 border border-[#373e4a]">
         <h1 className="text-2xl font-bold mb-6 text-center">Welcome Back</h1>
-        
-        {error && (
-          <div data-testid="auth-error" className="bg-red-900/20 border border-red-500/50 text-red-400 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
 
         <form data-testid="auth-login-form" onSubmit={handleSubmit} className="space-y-4">
           <div>

@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiService, Node } from '../services/api'
+import { useToast } from '../components/Toast'
 
 const Home: React.FC = () => {
+  const { addToast } = useToast()
   const [nodes, setNodes] = useState<Node[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     apiService.getNodes()
       .then(setNodes)
+      .catch((err) => addToast(err.message || 'Failed to load nodes', 'error'))
       .finally(() => setLoading(false))
   }, [])
 

@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { apiService, Node, Post } from '../services/api'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../components/Toast'
 
 const NodePage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
   const { isAuthenticated } = useAuth()
+  const { addToast } = useToast()
   const [node, setNode] = useState<Node | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
 
   useEffect(() => {
     if (!slug) return
@@ -23,7 +24,7 @@ const NodePage: React.FC = () => {
         setNode(nodeData)
         setPosts(postsData)
       } catch (err: any) {
-        setError(err.response?.data?.error || 'Failed to load node')
+        addToast(err.message || 'Failed to load node', 'error')
       } finally {
         setLoading(false)
       }
@@ -45,11 +46,11 @@ const NodePage: React.FC = () => {
     )
   }
 
-  if (error || !node) {
+  if (!node) {
     return (
       <div data-testid="common-not-found" className="text-center py-12">
         <h2 className="text-2xl font-bold text-red-400 mb-2">Node Not Found</h2>
-        <p className="text-[#8b929a]">{error || 'The node you\'re looking for doesn\'t exist.'}</p>
+        <p className="text-[#8b929a]">The node you\'re looking for doesn\'t exist.</p>
         <Link to="/" className="inline-block mt-4 text-orange-400 hover:text-orange-300">
           ← Back to Home
         </Link>

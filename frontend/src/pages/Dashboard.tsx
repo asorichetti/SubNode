@@ -1,27 +1,26 @@
 import React, { useEffect, useState } from 'react'
 import { apiService, InviteCode } from '../services/api'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../components/Toast'
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth()
+  const { addToast } = useToast()
   const [invites, setInvites] = useState<InviteCode[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateInvite, setShowCreateInvite] = useState(false)
   const [maxUses, setMaxUses] = useState(1)
   const [role, setRole] = useState<'member' | 'moderator'>('member')
-  const [success, setSuccess] = useState('')
-  const [error, setError] = useState('')
 
   useEffect(() => {
     apiService.getInvites()
       .then(setInvites)
+      .catch((err) => addToast(err.message || 'Failed to load invites', 'error'))
       .finally(() => setLoading(false))
   }, [])
 
   const handleCreateInvite = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setSuccess('')
 
     try {
       const newInvite = await apiService.createInvite({
@@ -30,10 +29,9 @@ const Dashboard: React.FC = () => {
       })
       setInvites([newInvite, ...invites])
       setShowCreateInvite(false)
-      setSuccess(`Invite code created: ${newInvite.code}`)
-      setTimeout(() => setSuccess(''), 5000)
+      addToast(`Invite code created: ${newInvite.code}`, 'success')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create invite')
+      addToast(err.message || 'Failed to create invite', 'error')
     }
   }
 
@@ -41,15 +39,15 @@ const Dashboard: React.FC = () => {
     try {
       await apiService.revokeInvite(id)
       setInvites(invites.filter(i => i.id !== id))
+      addToast('Invite revoked', 'info')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to revoke invite')
+      addToast(err.message || 'Failed to revoke invite', 'error')
     }
   }
 
   const copyToClipboard = (code: string) => {
     navigator.clipboard.writeText(code)
-    setSuccess('Copied to clipboard!')
-    setTimeout(() => setSuccess(''), 2000)
+    addToast('Copied to clipboard!', 'success')
   }
 
   return (
@@ -60,18 +58,6 @@ const Dashboard: React.FC = () => {
           Welcome, <span className="text-orange-400">{user?.username}</span> • Role: {user?.role}
         </p>
       </div>
-
-      {success && (
-        <div className="bg-green-900/20 border border-green-500/50 text-green-400 px-4 py-3 rounded">
-          {success}
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-900/20 border border-red-500/50 text-red-400 px-4 py-3 rounded">
-          {error}
-        </div>
-      )}
 
       {/* Invite Codes Section */}
       <div className="bg-[#1a1f2b] rounded-lg p-6 border border-[#373e4a]">

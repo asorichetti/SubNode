@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { apiService, Post } from '../services/api'
+import { useToast } from '../components/Toast'
 
 const PostPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
+  const { addToast } = useToast()
   const [post, setPost] = useState<Post | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
 
   useEffect(() => {
     if (!id) return
@@ -14,7 +15,7 @@ const PostPage: React.FC = () => {
     apiService.getPost(id)
       .then(setPost)
       .catch((err: any) => {
-        setError(err.response?.data?.error || 'Failed to load post')
+        addToast(err.message || 'Failed to load post', 'error')
       })
       .finally(() => setLoading(false))
   }, [id])
@@ -29,7 +30,7 @@ const PostPage: React.FC = () => {
     )
   }
 
-  if (error || !post) {
+  if (!post) {
     return (
       <div data-testid="common-not-found" className="text-center py-12">
         <h2 className="text-2xl font-bold text-red-400 mb-2">Post Not Found</h2>

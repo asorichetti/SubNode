@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { ToastProvider } from './components/Toast'
 import Header from './components/Header'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -10,6 +11,7 @@ import PostPage from './pages/PostPage'
 import Dashboard from './pages/Dashboard'
 import NotFound from './pages/NotFound'
 import BrokenPage from './pages/BrokenPage'
+import ErrorBoundary from './components/ErrorBoundary'
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth()
@@ -37,16 +39,20 @@ const AppRoutes: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-[#0f1419]">
-          <Header />
-          <main data-testid="page-content" className="container mx-auto px-4 py-6 max-w-6xl">
-            <AppRoutes />
-          </main>
-        </div>
-      </Router>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <ErrorBoundary>
+          <Router>
+            <div className="min-h-screen bg-[#0f1419]">
+              <Header />
+              <main data-testid="page-content" className="container mx-auto px-4 py-6 max-w-6xl">
+                <AppRoutes />
+              </main>
+            </div>
+          </Router>
+        </ErrorBoundary>
+      </AuthProvider>
+    </ToastProvider>
   )
 }
 

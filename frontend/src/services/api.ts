@@ -2,6 +2,19 @@ import axios from 'axios'
 
 const API_URL = '/api'
 
+// Custom error class for API errors
+export class ApiError extends Error {
+  status: number
+  details?: string
+
+  constructor(message: string, status: number, details?: string) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+    this.details = details
+  }
+}
+
 export interface Node {
   id: string
   name: string
@@ -50,65 +63,61 @@ class ApiService {
     })
   }
 
+  private async request<T>(fn: () => Promise<any>): Promise<T> {
+    try {
+      const response = await fn()
+      return response.data
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const status = error.response.status
+        const message = error.response.data?.error || 'Request failed'
+        throw new ApiError(message, status, error.response.data?.details)
+      }
+      throw new ApiError('Network error', 500)
+    }
+  }
+
   // Nodes
   async getNodes(): Promise<Node[]> {
-    const api = this.getApi()
-    const response = await api.get('/nodes')
-    return response.data
+    return this.request<Node[]>(() => this.getApi().get('/nodes'))
   }
 
   async getNode(slug: string): Promise<Node> {
-    const api = this.getApi()
-    const response = await api.get(`/nodes/${slug}`)
-    return response.data
+    return this.request<Node>(() => this.getApi().get(`/nodes/${slug}`))
   }
 
   async createNode(data: { name: string; description?: string; rules?: string }): Promise<Node> {
-    const api = this.getApi()
-    const response = await api.post('/nodes', data)
-    return response.data
+    return this.request<Node>(() => this.getApi().post('/nodes', data))
   }
 
   // Posts
   async getPosts(slug: string, page = 1, limit = 20): Promise<Post[]> {
-    const api = this.getApi()
-    const response = await api.get(`/nodes/${slug}/posts?page=${page}&limit=${limit}`)
-    return response.data
+    return this.request<Post[]>(() => this.getApi().get(`/nodes/${slug}/posts?page=${page}&limit=${limit}`))
   }
 
   async getPost(id: string): Promise<Post> {
-    const api = this.getApi()
-    const response = await api.get(`/posts/${id}`)
-    return response.data
+    return this.request<Post>(() => this.getApi().get(`/posts/${id}`))
   }
 
   async createPost(slug: string, data: { title: string; body?: string; url?: string; tags?: string[] }): Promise<Post> {
-    const api = this.getApi()
-    const response = await api.post(`/nodes/${slug}/posts`, data)
-    return response.data
+    return this.request<Post>(() => this.getApi().post(`/nodes/${slug}/posts`, data))
   }
 
   async votePost(id: string, vote: 'up' | 'down'): Promise<void> {
-    const api = this.getApi()
-    await api.post(`/posts/${id}/vote`, { vote })
+    return this.request<void>(() => this.getApi().post(`/posts/${id}/vote`, { vote }))
   }
 
   // Invites
   async createInvite(data: { max_uses?: number; expires?: string; role?: string }): Promise<InviteCode> {
-    const api = this.getApi()
-    const response = await api.post('/invites', data)
-    return response.data
+    return this.request<InviteCode>(() => this.getApi().post('/invites', data))
   }
 
   async getInvites(): Promise<InviteCode[]> {
-    const api = this.getApi()
-    const response = await api.get('/invites')
-    return response.data
+    return this.request<InviteCode[]>(() => this.getApi().get('/invites'))
   }
 
   async revokeInvite(id: string): Promise<void> {
-    const api = this.getApi()
-    await api.delete(`/invites/${id}`)
+    return this.request<void>(() => this.getApi().delete(`/invites/${id}`))
   }
 }
 
