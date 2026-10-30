@@ -126,6 +126,9 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: JWT_SECRET
               value: "change-me-in-production"
+            # Debug mode permits the default admin/admin seed for local clusters
+            - name: SERVER_MODE
+              value: "debug"
           resources:
             requests:
               memory: "128Mi"

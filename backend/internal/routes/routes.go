@@ -10,11 +10,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// Setup configures all routes for the application
+// Setup configures all routes for the application.
+// The gin mode is set by the caller (see cmd/server/main.go).
 func Setup(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, authHandler *handlers.AuthHandler, corsOrigins string, rateLimitEnabled bool, rateLimitRequests int, rateLimitWindow time.Duration) *gin.Engine {
-	// Set Gin mode
-	gin.SetMode("release")
-
 	r := gin.New()
 
 	// Add middleware

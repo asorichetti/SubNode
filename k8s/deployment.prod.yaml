@@ -64,6 +64,16 @@ spec:
                 secretKeyRef:
                   name: subnode-secrets
                   key: JWT_SECRET
+            - name: ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: subnode-secrets
+                  key: ADMIN_USERNAME
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: subnode-secrets
+                  key: ADMIN_PASSWORD
             - name: SERVER_MODE
               value: "release"
           resources:

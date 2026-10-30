@@ -35,6 +35,14 @@ func TestLoad_Defaults(t *testing.T) {
 	if cfg.CORS.AllowedOrigins != "*" {
 		t.Errorf("Expected CORS allowed origins *, got %s", cfg.CORS.AllowedOrigins)
 	}
+
+	if cfg.Admin.Username != "admin" {
+		t.Errorf("Expected admin username admin, got %s", cfg.Admin.Username)
+	}
+
+	if cfg.Admin.Password != "" {
+		t.Errorf("Expected empty admin password by default, got %s", cfg.Admin.Password)
+	}
 }
 
 func TestLoad_EnvOverrides(t *testing.T) {
@@ -44,6 +52,8 @@ func TestLoad_EnvOverrides(t *testing.T) {
 	os.Setenv("JWT_SECRET", "custom-secret")
 	os.Setenv("JWT_EXPIRY", "120")
 	os.Setenv("CORS_ALLOWED_ORIGINS", "https://example.com")
+	os.Setenv("ADMIN_USERNAME", "host")
+	os.Setenv("ADMIN_PASSWORD", "s3cret")
 	os.Setenv("RATE_LIMIT_ENABLED", "false")
 	os.Setenv("RATE_LIMIT_REQUESTS", "50")
 	os.Setenv("RATE_LIMIT_WINDOW", "30")
@@ -74,6 +84,14 @@ func TestLoad_EnvOverrides(t *testing.T) {
 		t.Errorf("Expected CORS allowed origins https://example.com, got %s", cfg.CORS.AllowedOrigins)
 	}
 
+	if cfg.Admin.Username != "host" {
+		t.Errorf("Expected admin username host, got %s", cfg.Admin.Username)
+	}
+
+	if cfg.Admin.Password != "s3cret" {
+		t.Errorf("Expected admin password s3cret, got %s", cfg.Admin.Password)
+	}
+
 	if cfg.RateLimit.Enabled {
 		t.Error("Expected rate limit disabled")
 	}
@@ -93,6 +111,8 @@ func TestLoad_EnvOverrides(t *testing.T) {
 	os.Unsetenv("JWT_SECRET")
 	os.Unsetenv("JWT_EXPIRY")
 	os.Unsetenv("CORS_ALLOWED_ORIGINS")
+	os.Unsetenv("ADMIN_USERNAME")
+	os.Unsetenv("ADMIN_PASSWORD")
 	os.Unsetenv("RATE_LIMIT_ENABLED")
 	os.Unsetenv("RATE_LIMIT_REQUESTS")
 	os.Unsetenv("RATE_LIMIT_WINDOW")

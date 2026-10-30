@@ -33,6 +33,8 @@ services:
       DB_USER: subnode
       DB_PASSWORD: subnode
       JWT_SECRET: dev-secret-change-me
+      # Debug mode permits the default admin/admin seed for local development
+      SERVER_MODE: debug
     depends_on:
       postgres:
         condition: service_healthy

@@ -11,8 +11,16 @@ type Config struct {
 	Server    ServerConfig
 	Database  DatabaseConfig
 	Auth      AuthConfig
+	Admin     AdminConfig
 	CORS      CORSConfig
 	RateLimit RateLimitConfig
+}
+
+// AdminConfig controls the seeded admin account. The password must be set
+// explicitly in release mode; the development defaults are refused there.
+type AdminConfig struct {
+	Username string
+	Password string
 }
 
 type ServerConfig struct {
@@ -70,6 +78,10 @@ func Load() *Config {
 		Auth: AuthConfig{
 			JWTSecret:   getEnv("JWT_SECRET", "change-this-in-production"),
 			TokenExpiry: GetEnvInt("JWT_EXPIRY", 60), // 60 minutes
+		},
+		Admin: AdminConfig{
+			Username: getEnv("ADMIN_USERNAME", "admin"),
+			Password: getEnv("ADMIN_PASSWORD", ""),
 		},
 		CORS: CORSConfig{
 			AllowedOrigins: getEnv("CORS_ALLOWED_ORIGINS", "*"),

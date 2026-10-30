@@ -59,24 +59,25 @@ func AutoMigrate(db *gorm.DB) error {
 	return db.AutoMigrate(defaultModels...)
 }
 
-// Seed creates default admin user if none exist
-func Seed(db *gorm.DB, cfg *config.Config) error {
+// Seed creates the default admin user if none exist.
+// The admin credentials must be provided explicitly; the server refuses to
+// start in release mode with the development defaults (see main.go).
+func Seed(db *gorm.DB, adminUsername, adminPassword string) error {
 	var count int64
 	db.Model(&models.User{}).Count(&count)
 	if count > 0 {
 		return nil
 	}
 
-	// Hash the default admin password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	// Create default admin user
 	admin := models.User{
-		Username: "admin",
-		Email:    "admin@localhost",
+		Username: adminUsername,
+		Email:    fmt.Sprintf("%s@localhost", adminUsername),
 		Role:     models.RoleAdmin,
 		Password: string(hashedPassword),
 	}
