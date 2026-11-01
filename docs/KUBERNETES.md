@@ -39,8 +39,15 @@ kubectl create secret generic subnode-db \
 # Create JWT secret
 kubectl create secret generic subnode-secrets \
   --namespace=subnode \
-  --from-literal=JWT_SECRET=your-secret-key-here
+  --from-literal=JWT_SECRET=your-secret-key-here \
+  --from-literal=ADMIN_USERNAME=admin \
+  --from-literal=ADMIN_PASSWORD=change-me
 ```
+
+> The server refuses to start in release mode (`SERVER_MODE=release`, the
+> default) unless `ADMIN_PASSWORD` is set to a non-default value. These
+> credentials are only used for the initial seed (first boot on an empty
+> database).
 
 ### 3. Deploy
 
