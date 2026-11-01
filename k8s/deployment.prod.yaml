@@ -69,6 +69,8 @@ spec:
                 secretKeyRef:
                   name: subnode-secrets
                   key: ADMIN_USERNAME
+                  # Optional: the server defaults to "admin"
+                  optional: true
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:

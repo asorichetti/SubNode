@@ -25,6 +25,9 @@ func main() {
 	// Resolve admin credentials for the initial seed. The default password
 	// is only tolerated outside release mode.
 	adminUsername, adminPassword := cfg.Admin.Username, cfg.Admin.Password
+	if adminUsername == "" {
+		log.Fatal("ADMIN_USERNAME must not be empty")
+	}
 	if adminPassword == "" {
 		if cfg.Server.Mode == "release" {
 			log.Fatal("ADMIN_PASSWORD must be set in release mode")
